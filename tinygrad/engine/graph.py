@@ -1,6 +1,6 @@
 import os, atexit, functools, pickle
 from collections import defaultdict
-from typing import List, Any, DefaultDict
+from typing import Dict, List, Any, DefaultDict
 from tinygrad.ops import UnaryOps, BinaryOps, ReduceOps, LoadOps, BufferOps, TernaryOps, LazyOp
 from tinygrad.device import Device
 from tinygrad.helpers import GRAPHPATH, DEBUG, GlobalCounters, getenv
@@ -21,7 +21,7 @@ if DEBUG >= 2:
   atexit.register(print_globalcounters)
 
 if getenv("SAVE_TRACE"):
-  trace = {}
+  trace: Dict = {}
   def save_trace(ast, lin=None):
     if len(trace) == 0:
       def _save():
