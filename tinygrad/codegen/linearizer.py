@@ -447,6 +447,9 @@ class Linearizer(Kernel):
 
   def to_program(self) -> Program:
     self.linearize()
+    if getenv("SAVE_TRACE"):
+      from tinygrad.engine.graph import save_trace
+      save_trace(self.ast, self)
     info = get_lazyop_info(self.ast[0])
     src = self.opts.render(to_function_name(self.name), self.uops)
     ops, mem = self.uops.flops_mem()

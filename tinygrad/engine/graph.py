@@ -1,4 +1,4 @@
-import os, atexit, functools
+import os, atexit, functools, pickle
 from collections import defaultdict
 from typing import List, Any, DefaultDict
 from tinygrad.ops import UnaryOps, BinaryOps, ReduceOps, LoadOps, BufferOps, TernaryOps, LazyOp
@@ -19,6 +19,17 @@ if DEBUG >= 2:
     print(f"avg: {GlobalCounters.global_ops*1e-9/GlobalCounters.time_sum_s:8.2f} GFLOPS {GlobalCounters.global_mem*1e-9/GlobalCounters.time_sum_s:8.2f} GB/s",  # noqa: E501
           f"{' '*10}total: {GlobalCounters.kernel_count:5d} kernels {GlobalCounters.global_ops*1e-9:8.2f} GOPS {GlobalCounters.global_mem*1e-9:8.2f} GB {GlobalCounters.time_sum_s*1e3:8.2f} ms")  # noqa: E501
   atexit.register(print_globalcounters)
+
+if getenv("SAVE_TRACE"):
+  trace = {}
+  def save_trace(ast, lin=None):
+    if len(trace) == 0:
+      def _save():
+        print(f"saving {len(trace)} trace items to", fp:=getenv("TRACE_PATH", "/tmp/trace"))
+        with open(fp, "ab") as f: pickle.dump(trace, f)
+      atexit.register(_save)
+    if lin is None: trace[ast] = []
+    else: trace[ast].append(lin)
 
 def save_graph(G, fn, opt=""):
   print("saving", G, f"to {fn}.svg")
