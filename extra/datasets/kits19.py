@@ -1,4 +1,3 @@
-import random
 import functools
 from pathlib import Path
 import numpy as np
@@ -10,6 +9,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 from tinygrad.tensor import Tensor
 from tinygrad.helpers import fetch
+import secrets
 
 BASEDIR = Path(__file__).parent / "kits19" / "data"
 PREPROCESSED_DIR =  Path(__file__).parent / "kits19" / "preprocessed"
@@ -85,7 +85,7 @@ def preprocess_dataset(filenames, preprocessed_dir, val):
 def iterate(files, preprocessed_dir=None, val=True, shuffle=False, bs=1):
   order = list(range(0, len(files)))
   preprocessed_dataset_dir = (preprocessed_dir / ("val" if val else "train")) if preprocessed_dir is not None else None
-  if shuffle: random.shuffle(order)
+  if shuffle: secrets.SystemRandom().shuffle(order)
   for i in range(0, len(files), bs):
     samples = []
     for i in order[i:i+bs]:
@@ -163,19 +163,19 @@ def sliding_window_inference(model, inputs, labels, roi_shape=(128, 128, 128), o
 def rand_flip(image, label, axis=(1, 2, 3)):
   prob = 1 / len(axis)
   for ax in axis:
-    if random.random() < prob:
+    if secrets.SystemRandom().random() < prob:
       image = np.flip(image, axis=ax).copy()
       label = np.flip(label, axis=ax).copy()
   return image, label
 
 def random_brightness_augmentation(image, low=0.7, high=1.3, prob=0.1):
-  if random.random() < prob:
+  if secrets.SystemRandom().random() < prob:
     factor = np.random.uniform(low=low, high=high, size=1)
     image = (image * (1 + factor)).astype(image.dtype)
   return image
 
 def gaussian_noise(image, mean=0.0, std=0.1, prob=0.1):
-  if random.random() < prob:
+  if secrets.SystemRandom().random() < prob:
     scale = np.random.uniform(low=0.0, high=std)
     noise = np.random.normal(loc=mean, scale=scale, size=image.shape).astype(image.dtype)
     image += noise
@@ -186,7 +186,7 @@ def _rand_foreg_cropb(image, label, patch_size):
     diff = patch_size[idx - 1] - (foreg_slice[idx].stop - foreg_slice[idx].start)
     sign = -1 if diff < 0 else 1
     diff = abs(diff)
-    ladj = 0 if diff == 0 else random.randrange(diff)
+    ladj = 0 if diff == 0 else secrets.SystemRandom().randrange(diff)
     hadj = diff - ladj
     low = max(0, foreg_slice[idx].start - sign * ladj)
     high = min(label.shape[idx], foreg_slice[idx].stop + sign * hadj)
@@ -202,7 +202,7 @@ def _rand_foreg_cropb(image, label, patch_size):
   slice_idx = np.argsort(slice_volumes)[-2:]
   foreg_slices = [foreg_slices[i] for i in slice_idx]
   if not foreg_slices: return _rand_crop(image, label)
-  foreg_slice = foreg_slices[random.randrange(len(foreg_slices))]
+  foreg_slice = foreg_slices[secrets.SystemRandom().randrange(len(foreg_slices))]
   low_x, high_x = adjust(foreg_slice, label, 1)
   low_y, high_y = adjust(foreg_slice, label, 2)
   low_z, high_z = adjust(foreg_slice, label, 3)
@@ -212,7 +212,7 @@ def _rand_foreg_cropb(image, label, patch_size):
 
 def _rand_crop(image, label, patch_size):
   ranges = [s - p for s, p in zip(image.shape[1:], patch_size)]
-  cord = [0 if x == 0 else random.randrange(x) for x in ranges]
+  cord = [0 if x == 0 else secrets.SystemRandom().randrange(x) for x in ranges]
   low_x, high_x = cord[0], cord[0] + patch_size[0]
   low_y, high_y = cord[1], cord[1] + patch_size[1]
   low_z, high_z = cord[2], cord[2] + patch_size[2]
@@ -221,7 +221,7 @@ def _rand_crop(image, label, patch_size):
   return image, label
 
 def rand_balanced_crop(image, label, patch_size=(128, 128, 128), oversampling=0.4):
-  if random.random() < oversampling:
+  if secrets.SystemRandom().random() < oversampling:
     image, label = _rand_foreg_cropb(image, label, patch_size)
   else:
     image, label = _rand_crop(image, label, patch_size)
