@@ -13,7 +13,27 @@ tensor_methods = {"Neg", "Reciprocal", "Pow", "Sqrt", "Sign", "Abs", "Exp", "Log
 # **************** Free Ops ****************
 
 def Identity(x: Tensor): return x
+
 # TODO: fix buffer_parse
+def Add(x: Tensor, other: Tensor, broadcast=None, axis=None):
+    if broadcast and axis is not None:
+        if isinstance(axis, int):
+            # Reshape 'other' to have singleton dimensions except at 'axis'
+            new_shape = [1] * x.ndim
+            new_shape[axis] = other.shape[0]
+            other = other.reshape(new_shape)
+        elif isinstance(axis, (list, tuple)):
+            # Reshape 'other' to have singleton dimensions except at specified axes
+            new_shape = [1] * x.ndim
+            for a, size in zip(axis, other.shape):
+                new_shape[a] = size
+            other = other.reshape(new_shape)
+    result = x + other
+    if x.dtype == dtypes.float or isinstance(x.dtype, ImageDType):
+        return result
+    else:
+        return result.cast(x.dtype)
+    
 def Add(x: Tensor, other: Tensor, broadcast=None, axis=None): return x + other if x.dtype == dtypes.float or isinstance(x.dtype, ImageDType) else (x + other).cast(x.dtype)
 def Sub(x: Union[Tensor, Any], other: Tensor): return x - other # some test has input as int
 def Less(x:Tensor,y:Tensor): return x < y
