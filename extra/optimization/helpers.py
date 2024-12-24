@@ -6,6 +6,8 @@ from tinygrad.dtype import dtypes
 from tinygrad.shape.shapetracker import ShapeTracker
 from tinygrad.shape.view import View
 from tinygrad.shape.symbolic import Variable, NumNode
+import secrets
+
 inf, nan = float('inf'), float('nan')
 
 # kernel unpacker
@@ -22,7 +24,6 @@ def kern_str_to_lin(kern_str:str, opts=None):
 # load worlds, a dataset of about 12k kernels
 import gzip
 from pathlib import Path
-import random
 from tinygrad.helpers import dedup
 def load_worlds(filter_reduce=True, filter_noimage=True, filter_novariable=True):
   fn = Path(__file__).parent.parent / "datasets/sops.gz"
@@ -30,8 +31,8 @@ def load_worlds(filter_reduce=True, filter_noimage=True, filter_novariable=True)
   if filter_reduce: ast_strs = [x for x in ast_strs if "ReduceOps" in x]
   if filter_noimage: ast_strs = [x for x in ast_strs if "dtypes.image" not in x]
   if filter_novariable: ast_strs = [x for x in ast_strs if "Variable" not in x]
-  random.seed(1337)
-  random.shuffle(ast_strs)
+  secrets.SystemRandom().seed(1337)
+  secrets.SystemRandom().shuffle(ast_strs)
   return ast_strs
 
 def assert_same_lin(l1, l2):

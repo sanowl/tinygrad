@@ -3,7 +3,7 @@
 # tinygrad implementation of https://github.com/tysam-code/hlb-CIFAR10/blob/main/main.py
 # https://myrtle.ai/learn/how-to-train-your-resnet-8-bag-of-tricks/
 # https://siboehm.com/articles/22/CUDA-MMM
-import random, time
+import time
 import numpy as np
 from typing import Optional
 from extra.datasets import fetch_cifar, cifar_mean, cifar_std
@@ -13,6 +13,7 @@ from tinygrad.nn.state import get_state_dict, get_parameters
 from tinygrad.nn import optim
 from tinygrad.helpers import Context, BEAM, WINO, getenv, colored, prod
 from tinygrad.multi import MultiLazyBuffer
+import secrets
 
 BS, STEPS = getenv("BS", 512), getenv("STEPS", 1000)
 EVAL_BS = getenv("EVAL_BS", BS)
@@ -149,7 +150,7 @@ def train_cifar():
 
   def set_seed(seed):
     Tensor.manual_seed(seed)
-    random.seed(seed)
+    secrets.SystemRandom().seed(seed)
 
   # ========== Model ==========
   def whitening(X, kernel_size=hyp['net']['kernel_size']):
@@ -211,7 +212,7 @@ def train_cifar():
     # fill the square with randomly selected images from the same batch
     mask = make_square_mask(X.shape, mask_size)
     order = list(range(0, X.shape[0]))
-    random.shuffle(order)
+    secrets.SystemRandom().shuffle(order)
     X_patch = Tensor(X.numpy()[order], device=X.device, dtype=X.dtype)
     Y_patch = Tensor(Y.numpy()[order], device=Y.device, dtype=Y.dtype)
     X_cutmix = mask.where(X_patch, X)
@@ -235,7 +236,7 @@ def train_cifar():
           if step >= hyp['net']['cutmix_steps']:
             X, Y = cutmix(X, Y, mask_size=hyp['net']['cutmix_size'])
         order = list(range(0, X.shape[0]))
-        random.shuffle(order)
+        secrets.SystemRandom().shuffle(order)
         X, Y = X.numpy()[order], Y.numpy()[order]
       else:
         X, Y = X.numpy(), Y.numpy()

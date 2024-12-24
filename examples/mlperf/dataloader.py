@@ -1,4 +1,4 @@
-import os, random, pickle, functools, itertools
+import os, pickle, functools, itertools
 from typing import List, Tuple
 from pathlib import Path
 import numpy as np
@@ -8,6 +8,7 @@ from tinygrad import dtypes, Tensor
 from tinygrad.helpers import getenv, prod, Context, round_up
 from collections import deque
 from multiprocessing import Queue, Process, shared_memory, connection, Lock, cpu_count, Pool
+import secrets
 
 class MyQueue:
   def __init__(self, multiple_readers=True, multiple_writers=True):
@@ -25,7 +26,7 @@ class MyQueue:
     if self._wlock: self._wlock.release()
 
 def shuffled_indices(n, seed=None):
-  rng = random.Random(seed)
+  rng = secrets.SystemRandom().Random(seed)
   indices = {}
   for i in range(n-1, -1, -1):
     j = rng.randint(0, i)
@@ -58,7 +59,7 @@ def loader_process(q_in, q_out, X:Tensor, seed):
           # reseed rng for determinism
           if seed is not None:
             np.random.seed(seed * 2 ** 10 + idx)
-            random.seed(seed * 2 ** 10 + idx)
+            secrets.SystemRandom().seed(seed * 2 ** 10 + idx)
           img = preprocess_train(img)
       else:
         # pad data with training mean
@@ -189,7 +190,7 @@ def shuffle_parts(file_paths: List[str]) -> List[str]:
     parts[part].append(f)
   
   part_ids = list(parts.keys())
-  random.shuffle(part_ids)
+  secrets.SystemRandom().shuffle(part_ids)
 
   shuffled_files = []
   for p in part_ids:
@@ -198,7 +199,7 @@ def shuffle_parts(file_paths: List[str]) -> List[str]:
   return shuffled_files
 
 def random_sample(data: List[str]):
-  index = random.randint(0, len(data) - 1)
+  index = secrets.SystemRandom().randint(0, len(data) - 1)
   selected_sample = data[index]
   return selected_sample, index
 
@@ -224,7 +225,7 @@ def batch_load_train_bert(BS:int, start_step:int = 0):
     blob = []
     for _ in range(BS):
       if active_set:
-        index = random.randint(0, len(active_set) - 1)
+        index = secrets.SystemRandom().randint(0, len(active_set) - 1)
         sample = active_set[index]
         active_set.remove(sample)
         blob.append(sample)

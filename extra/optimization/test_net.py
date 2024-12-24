@@ -1,6 +1,7 @@
 import numpy as np
 import math
-import random
+import secrets
+
 np.set_printoptions(suppress=True)
 from copy import deepcopy
 from tinygrad.helpers import getenv, colored
@@ -24,8 +25,8 @@ if __name__ == "__main__":
   ast_strs = load_worlds()
 
   # real randomness
-  random.seed()
-  random.shuffle(ast_strs)
+  secrets.SystemRandom().seed()
+  secrets.SystemRandom().shuffle(ast_strs)
 
   wins = 0
   for ep_num,ast_str in enumerate(ast_strs):

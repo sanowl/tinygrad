@@ -1,5 +1,4 @@
 import sys
-import random
 import json
 import numpy
 from pathlib import Path
@@ -8,6 +7,7 @@ from tinygrad.tensor import Tensor
 from tinygrad.nn.optim import SGD
 from tinygrad.nn.state import safe_save, safe_load, get_state_dict, load_state_dict
 from examples.vgg7_helpers.waifu2x import image_load, image_save, Vgg7
+import secrets
 
 # amount of context erased by model
 CONTEXT = 7
@@ -161,7 +161,7 @@ elif cmd == "train":
       sample_idx = numpy.random.choice(samples_count, p = sample_probs / sample_probs.sum())
     except:
       print("exception occurred (PROBABLY value-probabilities-dont-sum-to-1)")
-      sample_idx = random.randint(0, samples_count - 1)
+      sample_idx = secrets.SystemRandom().randint(0, samples_count - 1)
 
     x_img = image_load(samples_base + "/" + str(sample_idx) + "a.png")
     y_img = image_load(samples_base + "/" + str(sample_idx) + "b.png")

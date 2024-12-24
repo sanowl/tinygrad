@@ -4,13 +4,13 @@ from extra.models.mask_rcnn import BoxList
 from torch.nn import functional as F
 from torchvision import transforms as T
 from torchvision.transforms import functional as Ft
-import random
 from tinygrad.tensor import Tensor
 from PIL import Image
 import numpy as np
 import torch
 import argparse
 import cv2
+import secrets
 
 
 class Resize:
@@ -23,7 +23,7 @@ class Resize:
   # modified from torchvision to add support for max size
   def get_size(self, image_size):
     w, h = image_size
-    size = random.choice(self.min_size)
+    size = secrets.choice(self.min_size)
     max_size = self.max_size
     if max_size is not None:
       min_original_size = float(min((w, h)))

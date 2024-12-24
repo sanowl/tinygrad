@@ -1,5 +1,5 @@
 from typing import Dict, List, cast, DefaultDict, Optional, Tuple, Callable
-import itertools, functools, random, math, time, multiprocessing, traceback, signal
+import itertools, functools, math, time, multiprocessing, traceback, signal
 from collections import defaultdict
 from dataclasses import replace
 from tinygrad.device import Device, Buffer, Compiler
@@ -13,6 +13,7 @@ from tinygrad.tensor import Tensor
 from tinygrad.shape.symbolic import sym_infer
 from tinygrad.engine.realize import CompiledRunner
 from tinygrad.renderer import Program
+import secrets
 
 actions = [Opt(op=OptOps.UPCAST, axis=axis, amt=amt) for amt in [0,2,3,4,5,7] for axis in range(6)]
 actions += [Opt(op=OptOps.UNROLL, axis=axis, amt=amt) for amt in [0,4,7] for axis in range(5)]
@@ -174,7 +175,7 @@ def optimize_local_size(clprg:Callable, global_size:List[int], rawbufs:List[Buff
   def try_exec(local_size):
     try: return clprg(*[x._buf for x in test_rawbuffers], global_size=[g//l if g%l == 0 else g/l for g,l in zip(global_size, local_size)], local_size=local_size, wait=True)  # noqa: E501
     except Exception: return float('inf')
-  ret = min([(try_exec(local_size), local_size) for local_size in random.sample(local_sizes, len(local_sizes))])
+  ret = min([(try_exec(local_size), local_size) for local_size in secrets.SystemRandom().sample(local_sizes, len(local_sizes))])
   assert not math.isinf(ret[0]), "all optimize_local_size exec failed"
   return ret[1]
 
