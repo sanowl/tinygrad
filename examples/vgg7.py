@@ -15,7 +15,7 @@ CONTEXT = 7
 def get_sample_count(samples_dir):
   try:
     samples_dir_count_file = open(samples_dir + "/sample_count.txt", "r")
-    v = samples_dir_count_file.readline()
+    v = samples_dir_count_file.readline(5_000_000)
     samples_dir_count_file.close()
     return int(v)
   except:
