@@ -6,6 +6,7 @@ from multiprocessing import Queue, Process, shared_memory, connection, Lock, cpu
 import numpy as np
 from tinygrad import dtypes, Tensor
 from tinygrad.helpers import getenv, prod, Context, round_up, tqdm
+import fickling
 
 ### ResNet
 
@@ -181,7 +182,7 @@ def process_batch_bert(data: List[dict]) -> dict[str, Tensor]:
 
 def load_file(file: str):
   with open(file, "rb") as f:
-    return pickle.load(f)
+    return fickling.load(f)
 
 class InterleavedDataset:
   def __init__(self, files:List[str], cycle_length:int):

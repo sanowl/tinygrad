@@ -1,7 +1,8 @@
-import os, gzip, tarfile, pickle
+import os, gzip, tarfile
 import numpy as np
 from tinygrad import Tensor, dtypes
 from tinygrad.helpers import fetch
+import fickling
 
 def fetch_mnist(tensors=False):
   parse = lambda file: np.frombuffer(gzip.open(file).read(), dtype=np.uint8).copy()
@@ -36,8 +37,8 @@ def fetch_cifar():
     print("downloading and extracting CIFAR...")
     fn = fetch('https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz')
     tt = tarfile.open(fn, mode='r:gz')
-    _load_disk_tensor(X_train, Y_train, [pickle.load(tt.extractfile(f'cifar-10-batches-py/data_batch_{i}'), encoding="bytes") for i in range(1,6)])
-    _load_disk_tensor(X_test, Y_test, [pickle.load(tt.extractfile('cifar-10-batches-py/test_batch'), encoding="bytes")])
+    _load_disk_tensor(X_train, Y_train, [fickling.load(tt.extractfile(f'cifar-10-batches-py/data_batch_{i}'), encoding="bytes") for i in range(1,6)])
+    _load_disk_tensor(X_test, Y_test, [fickling.load(tt.extractfile('cifar-10-batches-py/test_batch'), encoding="bytes")])
     open("/tmp/cifar_extracted", "wb").close()
 
   return X_train, Y_train, X_test, Y_test
