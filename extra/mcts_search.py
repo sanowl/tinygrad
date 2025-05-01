@@ -1,8 +1,10 @@
 from __future__ import annotations
 from typing import List, Optional, Dict, cast
 import numpy as np
+import secrets
+
 np.set_printoptions(suppress=True)
-import math, functools, time, random, statistics
+import math, functools, time, statistics
 from tinygrad.helpers import DEBUG, getenv, CACHELEVEL, diskcache_get, diskcache_put, colored, Profiling
 from tinygrad.codegen.kernel import Kernel
 from tinygrad.device import Buffer, Device, CompileError
@@ -43,7 +45,7 @@ def _sample_tree(node:MCTSNode, best_tm:float) -> MCTSNode:
       if not math.isinf(ucb):
         explored_children.append(child)
         ucb_explored_children.append(ucb)
-  if len(unexplored_children): return random.choice(unexplored_children)
+  if len(unexplored_children): return secrets.choice(unexplored_children)
   if not len(explored_children): return node
   ucb_exp = np.exp(np.array(ucb_explored_children)/TEMP)
   return _sample_tree(explored_children[np.random.choice(len(ucb_exp), p=ucb_exp/np.sum(ucb_exp))], best_tm)
@@ -66,7 +68,7 @@ def sample_tree(root:MCTSNode, best_tm:float) -> Optional[MCTSNode]:
       if len(node.children) == 0:
         remove_node(node)
         continue
-      node = random.choice(node.children)
+      node = secrets.choice(node.children)
     return node
   return None
 

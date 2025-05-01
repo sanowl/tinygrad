@@ -16,6 +16,7 @@ from tqdm import tqdm
 from tqdm.contrib.concurrent import process_map
 
 from tinygrad.helpers import diskcache, getenv
+import secrets
 
 BASEDIR = getenv('BASEDIR', Path(__file__).parent / "wiki")
 
@@ -359,7 +360,7 @@ def process_part(part:int):
     pickle.dump(features, f)
 
 def get_features_from_part(tokenizer:Tokenizer, val:bool=False, part:int=0) -> list[dict]: # Convert raw text to masked NSP samples
-  rng = random.Random(getenv('RANDOM_SEED', 12345))
+  rng = secrets.SystemRandom().Random(getenv('RANDOM_SEED', 12345))
 
   if val:
     tqdm.write("Getting samples from dataset")

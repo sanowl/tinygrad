@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import numpy as np
-import random
 
 from tinygrad.nn.state import get_parameters
 from tinygrad.nn.optim import Adam
 from extra.training import train, evaluate
 from extra.models.transformer import Transformer
+import secrets
 
 # dataset idea from https://github.com/karpathy/minGPT/blob/master/projects/adder/adder.py
 def make_dataset():
@@ -14,7 +14,7 @@ def make_dataset():
     for j in range(100):
       s = i+j
       ds.append([i//10, i%10, j//10, j%10, s//100, (s//10)%10, s%10])
-  random.shuffle(ds)
+  secrets.SystemRandom().shuffle(ds)
   ds = np.array(ds).astype(np.float32)
   ds_X = ds[:, 0:6]
   ds_Y = np.copy(ds[:, 1:])

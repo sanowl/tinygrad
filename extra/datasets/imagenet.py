@@ -1,9 +1,10 @@
 # for imagenet download prepare.sh and run it
-import glob, random, json, math
+import glob, json, math
 import numpy as np
 from PIL import Image
 import functools, pathlib
 from tinygrad.helpers import diskcache, getenv
+import secrets
 
 @functools.lru_cache(None)
 def get_imagenet_categories():
@@ -41,7 +42,7 @@ def image_resize(img, size, interpolation):
   return img.resize([w_new, h_new], interpolation)
 
 def rand_flip(img):
-  if random.random() < 0.5:
+  if secrets.SystemRandom().random() < 0.5:
     img = np.flip(img, axis=1).copy()
   return img
 
@@ -61,16 +62,16 @@ def random_resized_crop(img, size, scale=(0.10, 1.0), ratio=(3/4, 4/3)):
   # Crop
   random_solution_found = False
   for _ in range(100):
-    aspect_ratio = random.uniform(ratio[0], ratio[1])
+    aspect_ratio = secrets.SystemRandom().uniform(ratio[0], ratio[1])
     max_scale = min(min(w * aspect_ratio / h, h / aspect_ratio / w), scale[1])
-    target_area = area * random.uniform(scale[0], max_scale)
+    target_area = area * secrets.SystemRandom().uniform(scale[0], max_scale)
 
     w_new = int(round(math.sqrt(target_area * aspect_ratio)))
     h_new = int(round(math.sqrt(target_area / aspect_ratio)))
 
     if 0 < w_new <= w and 0 < h_new <= h:
-      crop_left = random.randint(0, w - w_new)
-      crop_top = random.randint(0, h - h_new)
+      crop_left = secrets.SystemRandom().randint(0, w - w_new)
+      crop_top = secrets.SystemRandom().randint(0, h - h_new)
 
       img = img.crop((crop_left, crop_top, crop_left + w_new, crop_top + h_new))
       random_solution_found = True
