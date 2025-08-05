@@ -1,5 +1,5 @@
 from __future__ import annotations
-import multiprocessing, decimal, statistics, random
+import multiprocessing, decimal, statistics
 from dataclasses import dataclass
 from collections import defaultdict
 from typing import List, Optional, Dict, Tuple, Any, cast, Protocol, Type
@@ -7,6 +7,7 @@ import importlib, inspect, functools, pathlib, os, ctypes, atexit, time, context
 from tinygrad.helpers import SAVE_SCHEDULE, getenv, diskcache_get, diskcache_put, DEBUG, GlobalCounters, flat_mv, from_mv, ProfileLogger, PROFILE
 from tinygrad.dtype import DType, ImageDType
 from tinygrad.renderer import Renderer
+import secrets
 
 # **************** Device ****************
 
@@ -545,7 +546,7 @@ class HCQCompiled(Compiled):
     choices: List = [(d, d.hw_compute_queue_t, []) for d in self.devices]
     choices += [(d, d.hw_copy_queue_t, []) for d in self.devices if d.hw_copy_queue_t is not None]
     for _ in range(100*len(self.devices)):
-      d,q,l = random.choice(choices)
+      d,q,l = secrets.choice(choices)
       l.append(_sync_cpu_queue(d,q))
     for d,q,l in choices:
       if q == d.hw_compute_queue_t: d.gpu2cpu_compute_time_diff = statistics.median(l)
