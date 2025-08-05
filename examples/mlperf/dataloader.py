@@ -1,4 +1,4 @@
-import os, random, pickle, queue
+import os, pickle, queue
 from typing import List
 from pathlib import Path
 from multiprocessing import Queue, Process, shared_memory, connection, Lock, cpu_count
@@ -6,6 +6,7 @@ from multiprocessing import Queue, Process, shared_memory, connection, Lock, cpu
 import numpy as np
 from tinygrad import dtypes, Tensor
 from tinygrad.helpers import getenv, prod, Context, round_up, tqdm
+import secrets
 
 ### ResNet
 
@@ -25,7 +26,7 @@ class MyQueue:
     if self._wlock: self._wlock.release()
 
 def shuffled_indices(n, seed=None):
-  rng = random.Random(seed)
+  rng = secrets.SystemRandom().Random(seed)
   indices = {}
   for i in range(n-1, -1, -1):
     j = rng.randint(0, i)
@@ -59,7 +60,7 @@ def loader_process(q_in, q_out, X:Tensor, seed):
           # reseed rng for determinism
           if seed is not None:
             np.random.seed(seed * 2 ** 10 + idx)
-            random.seed(seed * 2 ** 10 + idx)
+            secrets.SystemRandom().seed(seed * 2 ** 10 + idx)
           img = preprocess_train(img)
       else:
         # pad data with training mean
@@ -216,7 +217,7 @@ def batch_load_train_bert(BS:int):
   fs = sorted(get_wiki_train_files())
   train_files = []
   while fs: # TF shuffle
-    random.shuffle(fs)
+    secrets.SystemRandom().shuffle(fs)
     train_files.append(fs.pop(0))
 
   cycle_length = min(getenv("NUM_CPU_THREADS", min(os.cpu_count(), 8)), len(train_files))
@@ -227,7 +228,7 @@ def batch_load_train_bert(BS:int):
   while True:
     batch = []
     for _ in range(BS):
-      index = random.randint(0, 999)
+      index = secrets.SystemRandom().randint(0, 999)
       batch.append(buffer[index])
       buffer[index] = dataset.get()
     yield process_batch_bert(batch)
@@ -259,7 +260,7 @@ def load_unet3d_data(preprocessed_dataset_dir, seed, queue_in, queue_out, X:Tens
     if not val:
       if seed is not None:
         np.random.seed(seed)
-        random.seed(seed)
+        secrets.SystemRandom().seed(seed)
 
       x, y = rand_balanced_crop(x, y)
       x, y = rand_flip(x, y)
@@ -304,7 +305,7 @@ def batch_load_unet3d(preprocessed_dataset_dir:Path, batch_size:int=6, val:bool=
       queue_in.put((idx, fn, val))
 
   def shuffle_indices(file_indices, seed=None):
-    rng = random.Random(seed)
+    rng = secrets.SystemRandom().Random(seed)
     rng.shuffle(file_indices)
 
   if shuffle: shuffle_indices(file_indices, seed=seed)

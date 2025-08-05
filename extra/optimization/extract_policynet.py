@@ -1,4 +1,4 @@
-import os, sys, sqlite3, pickle, random
+import os, sys, sqlite3, pickle
 from tqdm import tqdm, trange
 from copy import deepcopy
 from tinygrad.nn import Linear
@@ -16,6 +16,8 @@ from tinygrad.dtype import dtypes
 from tinygrad.shape.shapetracker import ShapeTracker
 from tinygrad.shape.view import View
 from tinygrad.shape.symbolic import Variable
+import secrets
+
 inf, nan = float('inf'), float('nan')
 from tinygrad.codegen.kernel import Opt, OptOps
 
@@ -62,7 +64,7 @@ if __name__ == "__main__":
 
   print(X.shape, V.shape)
   order = list(range(X.shape[0]))
-  random.shuffle(order)
+  secrets.SystemRandom().shuffle(order)
   X, V = X[order], V[order]
 
   ratio = -256
@@ -77,7 +79,7 @@ if __name__ == "__main__":
   def get_minibatch(X,Y,bs):
     xs, ys = [], []
     for _ in range(bs):
-      sel = random.randint(0, len(X)-1)
+      sel = secrets.SystemRandom().randint(0, len(X)-1)
       xs.append(X[sel])
       ys.append(Y[sel])
     return Tensor(xs), Tensor(ys)

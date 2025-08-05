@@ -9,6 +9,8 @@ from tinygrad.dtype import dtypes
 from tinygrad.shape.shapetracker import ShapeTracker
 from tinygrad.shape.view import View
 from tinygrad.shape.symbolic import Variable
+import secrets
+
 inf, nan = float('inf'), float('nan')
 from tinygrad.codegen.kernel import Opt, OptOps
 
@@ -19,7 +21,6 @@ from extra.optimization.helpers import lin_to_feats
 from extra.optimization.pretrain_valuenet import ValueNet
 from tinygrad.nn.optim import Adam
 from tinygrad.nn.state import get_parameters, get_state_dict, safe_save, safe_load, load_state_dict
-import random
 from tinygrad.tensor import Tensor
 from tinygrad.helpers import getenv
 
@@ -80,7 +81,7 @@ if __name__ == "__main__":
 
   print(X.shape, V.shape)
   order = list(range(X.shape[0]))
-  random.shuffle(order)
+  secrets.SystemRandom().shuffle(order)
   X, V = X[order], V[order]
 
   ratio = -512
@@ -99,7 +100,7 @@ if __name__ == "__main__":
     xs, ys = [], []
     #random.seed(1337)
     for _ in range(bs):
-      sel = random.randint(0, len(X)-1)
+      sel = secrets.SystemRandom().randint(0, len(X)-1)
       xs.append(X[sel])
       ys.append(Y[sel])
     return Tensor(xs), Tensor(ys)
